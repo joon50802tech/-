@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحدي تاريخ تانية ثانوي - كتاب المدرسة</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- الشاشة الرئيسية لاختيار القسمين -->
+        <div id="home-screen" class="screen active">
+            <div class="main-title-badge">🇪🇬 كتاب وزارة التربية والتعليم - تانية ثانوي</div>
+            <h1>📜 بنك أسئلة تاريخ مصر القديمة</h1>
+            <p class="subtitle">اختر القسم الذي تريد البدء به:</p>
+            
+            <div class="main-sections-grid">
+                <div class="main-section-box" onclick="startSection('mcq')">
+                    <div class="section-icon">⚡</div>
+                    <div class="section-info">
+                        <h3>قسم أسئلة الاختيار</h3>
+                        <p>جميع أسئلة الاختيار من متعدد مع شريط التقدم الفوري والشرح</p>
+                    </div>
+                </div>
+                
+                <div class="main-section-box" onclick="startSection('essay')">
+                    <div class="section-icon">✍️</div>
+                    <div class="section-info">
+                        <h3>قسم الأسئلة المقالية</h3>
+                        <p>جميع الأسئلة المقالية والشروحات النموذجية لكتاب المدرسة</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- شاشة قسم الاختيار من متعدد -->
+        <div id="mcq-screen" class="screen">
+            <div class="quiz-header">
+                <button class="back-arrow-btn" onclick="goHome()" title="العودة للقائمة">&#8592;</button>
+                <span>⚡ اختبار الاختيار من متعدد</span>
+                <span id="mcq-score-counter">الدرجة: 0</span>
+            </div>
+
+            <!-- شريط التقدم العلوي -->
+            <div class="progress-bar-container">
+                <div id="progress-bar-fill" class="progress-bar-fill"></div>
+            </div>
+            <div class="progress-text">السؤال <span id="current-q-num">1</span> من <span id="total-q-num">1</span></div>
+
+            <div class="question-container">
+                <h2 id="mcq-question-text">نص السؤال هنا...</h2>
+                <div id="options-container" class="options-grid"></div>
+                
+                <!-- صندوق شرح الإجابة عند الخطأ -->
+                <div id="explanation-box" class="explanation-box hidden">
+                    <h3>💡 توضيح وشرح الإجابة:</h3>
+                    <p id="explanation-text"></p>
+                </div>
+            </div>
+
+            <button id="next-btn" class="hidden" onclick="nextMcqQuestion()">السؤال التالي ➔</button>
+        </div>
+
+        <!-- شاشة قسم الأسئلة المقالية -->
+        <div id="essay-screen" class="screen">
+            <div class="quiz-header">
+                <button class="back-arrow-btn" onclick="goHome()" title="العودة للقائمة">&#8592;</button>
+                <span>✍️ بنك الأسئلة المقالية والتحليل</span>
+                <span>📚 شامل المنهج</span>
+            </div>
+
+            <div class="essay-intro">
+                <p>هنا تجد جميع الأسئلة المقالية لكتاب المدرسة مع الإجابة النموذجية والشرح الكامل:</p>
+            </div>
+            
+            <div id="essay-container" class="essay-container-list">
+                <!-- تتولد الأسئلة المقالية تلقائياً هنا -->
+            </div>
+            
+            <br>
+            <button class="restart-btn" onclick="goHome()">العودة للقائمة الرئيسية 🏠</button>
+        </div>
+
+        <!-- شاشة نتيجة الاختيارات -->
+        <div id="result-screen" class="screen">
+            <div class="result-icon-badge">🏆</div>
+            <h2>نتيجة اختبار الاختيار</h2>
+            <p id="result-message">لقد أنجزت جميع أسئلة الاختيار بنجاح!</p>
+            <div class="score-card">
+                <span id="final-score">0 / 0</span>
+            </div>
+            <br>
+            <button class="restart-btn" onclick="goHome()">العودة للقائمة الرئيسية 🏠</button>
+        </div>
+    </div>
+
+    <script>
+        // جميع أسئلة الاختيار من متعدد للمنهج بالكامل في مكان واحد
+        const allMcqQuestions = [
+            {
+                q: "يُعد التحليل الأكثر دقة لأسباب احتلال مصر في العصور القديمة:",
+                options: ["ضعف مستمر للجيش المصري.", "ضعف داخلي وموقع متميز.", "كثرة السكان ونقص الموارد.", "غياب التراث الحضاري المؤثر."],
+                answer: 1,
+                explanation: "التحليل الأدق هو (ضعف داخلي وموقع متميز)؛ فالاحتلال لا يأتي لمجرد الموقع المميز إلا إذا وجد تفككاً وضعفاً داخلياً في الدولة يسهّل السيطرة عليها."
+            },
+            {
+                q: "تتمثل الحقيقة الأبرز التي كشفها الغزو الفارسي لمصر في أن:",
+                options: ["التماسك الداخلي أهم عناصر قوة الدولة.", "قوة الحضارة وحدها تحمي الدولة من الخطر.", "الموقع نقمة مستمرة على تاريخ مصر.", "الجيش لا يحتاج إلى تطوير إلا وقت الضرورة."],
+                answer: 0,
+                explanation: "الغزو الفارسي أثبت أن التماسك الداخلي ووحدة الجبهة الداخلية هما الدرع الحقيقي لأي دولة، وغيابهما يؤدي لسقوطها مهما كانت عظيمة."
+            },
+            {
+                q: "يتمثل أهم درس استفادته مصر من تجربة الهكسوس في ...............",
+                options: ["أهمية الانعزال عن قارة آسيا.", "تطوير الجيش وتأمين الحدود.", "ضرورة الاعتماد على الجنود المرتزقة.", "تدعيم الأنشطة الاقتصادية المختلفة."],
+                answer: 1,
+                explanation: "الدرس الأهم هو ضرورة بناء وتطوير جيش قوي وتأمين الحدود الشمالية الشرقية لمنع أي غزو مفاجئ مشابه لتجربة الهكسوس."
+            },
+            {
+                q: "أي من العوامل التالية يُعد العامل الأهم في طرد الهكسوس؟",
+                options: ["التخطيط العسكري المنظم", "القيادة السياسية الشجاعة", "وحدة الشعب والتفافه حول القيادة للتخلص من المحتل", "وفرة السلاح الحديث فقط"],
+                answer: 2,
+                explanation: "وحدة الشعب المصري والتفافه حول قيادته الوطنية (مثل أحمس وأمراء طيبة) كانت هي الصخرة التي تحطمت عليها أطماع الهكسوس."
+            },
+            {
+                q: "نجح الإسكندر في دخول مصر من دون مقاومة تُذكر، ويرجع ذلك إلى:",
+                options: ["قوته العسكرية الجبارة.", "تحالفه المباشر مع الرومان.", "احترامه للمصريين واستياءهم من حكم الفرس.", "تخلّي المصريين عن الدفاع عن وطنهم بالكامل."],
+                answer: 2,
+                explanation: "رحّب المصريون بالإسكندر لأنه احترم معتقداتهم وتقاليدهم، ولكي يتخلصوا من قسوة واضطهاد الحكم الفارسي."
+            },
+            {
+                q: "أكثر قادة الإسكندر الذين حصلوا على مناطق مهمة تُمثلوا في:",
+                options: ["بطلمويوس وليسيماكوس.", "كاسندر وسلوقس.", "ليسيماكوس وكاسندر.", "سلوقس وبطلميوس."],
+                answer: 3,
+                explanation: "سلوقس سيطر على سوريا والعراق ومناطق واسعة، وبطلميوس سيطر على مصر، وهما من أكتسح أهم مناطق الإمبراطورية."
+            },
+            {
+                q: "حلل العلاقة بين (الموارد الاقتصادية لمصر) والأطماع الخارجية:",
+                options: ["علاقة طردية؛ فكلما كانت الموارد وفيرة وغنية (مثل الحبوب)، زادت الأطماع الخارجية واحتلال مصر", "علاقة عكسية؛ الموارد الكثيرة تحمي مصر من الاحتلال", "لا توجد أي علاقة بين الموارد والحروب", "الموارد الاقتصادية تجعل الدول تبتعد عن احتلال مصر"],
+                answer: 0,
+                explanation: "الموارد الاقتصادية الغنية لمصر (خاصة محاصيل الحبوب وخيراتها) كانت سبباً رئيسياً ومباشراً لطمع الدول الكبرى في السيطرة عليها واستغلالها."
+            },
+            {
+                q: "في ضوء نص لوحة الكرنك للملكة إياح حتب، ما الدلالة التاريخية لذكر دورها في جمع الجيش وحماية البلاد؟",
+                options: ["دلالة على الدور الوطني العظيم للمرأة المصرية ووقوفها بجانب القيادة في حماية واستعادة استقلال الوطن", "دلالة على ضعف الملوك الرجال فقط", "دلالة على تدخل الدول المجاورة في الشؤون الداخلية", "دلالة على ازدهار التجارة الداخلية"],
+                answer: 0,
+                explanation: "إشادة الملك أحمس بوالدته إياح حتب في لوحة الكرنك تُظهر الدور البارز والمحوري للمرأة في دعم المجهود الحربي وجمع الصفوف وقت الأزمات الوطنية."
+            }
+        ];
+
+        // جميع الأسئلة المقالية وإجاباتها بالكامل في مكان واحد
+        const allEssayQuestions = [
+            {
+                q: "تعرضت مصر في العصور القديمة للعديد من الأخطار، حدد أهم أركان قيام الدولة التي افتقدتها مصر بعد تعرضها للغزو؟",
+                ans: "فقدت ركن السيادة والاستقلال الوطني والحرية السياسية في إرادة إدارة شؤون البلاد."
+            },
+            {
+                q: "ناقش عبارة: (احتلال مصر في العصور القديمة كان نتيجة ضعف داخلي أكثر منه قوة خارجية)؟",
+                ans: "العبارة صحيحة؛ فالضعف والانقسام السياسي الداخلي يمثل الثغرة الأساسية التي تستغلها القوى الخارجية للطمع في ثروات البلاد."
+            },
+            {
+                q: "ماذا لو لم يقاوم المصريون الهكسوس؟",
+                ans: "لتم طمس الهوية المصرية وفقدان الاستقلال الثقافي والسياسي للأبد وخضوع البلاد للمستعمر."
+            },
+            {
+                q: "قارن بين أسباب نجاح الهكسوس والفرس في دخول مصر، وما العامل المشترك بينهم؟",
+                ans: "العامل المشترك الأساسي بين الحالتين هو حالة التفكك والضعف السياسي الداخلي التي عانت منها مصر في تلك الفترات."
+            },
+            {
+                q: "كيف تحولت مصر في العصور القديمة من نقطة جذب حضاري إلى ساحة صراع دولي؟",
+                ans: "بسبب موقعها الجغرافي المتميز وتوسطها لطرق التجارة العالمية وثرواتها الاقتصادية الطائلة التي جعلتها محط أنظار الإمبراطوريات."
+            },
+            {
+                q: "حلل العلاقة بين (التنافس الدولي) واحتلال مصر عبر التاريخ:",
+                ans: "التنافس المستمر بين الإمبراطوريات للسيطرة على طرق التجارة العالمية وموازين القوى جعل مصر جوهرة الصراع والهدف الأبرز للغزو."
+            },
+            {
+                q: "وضح الأهمية التاريخية لدور الملكة إياح حتب من خلال لوحة الكرنك:",
+                ans: "قادت جهود حشد الصفوف وجمع الجيش المصري واستعادة الاستقرار الداخلي بعد استشهاد زوجها وابنها في حروب التحرير."
+            }
+        ];
+
+        let currentMcqIndex = 0;
+        let score = 0;
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function goHome() {
+            showScreen('home-screen');
+        }
+
+        function startSection(sectionType) {
+            if (sectionType === 'mcq') {
+                currentMcqIndex = 0;
+                score = 0;
+                showScreen('mcq-screen');
+                loadMcqQuestion();
+            } else {
+                showScreen('essay-screen');
+                loadEssayContent();
+            }
+        }
+
+        function loadMcqQuestion() {
+            const currentQ = allMcqQuestions[currentMcqIndex];
+            
+            document.getElementById('mcq-question-text').textContent = currentQ.q;
+            document.getElementById('mcq-score-counter').textContent = `الدرجة: ${score}`;
+            
+            // تحديث شريط التقدم
+            const total = allMcqQuestions.length;
+            const progressPercent = ((currentMcqIndex + 1) / total) * 100;
+            document.getElementById('progress-bar-fill').style.width = `${progressPercent}%`;
+            document.getElementById('current-q-num').textContent = currentMcqIndex + 1;
+            document.getElementById('total-q-num').textContent = total;
+
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            document.getElementById('explanation-box').classList.add('hidden');
+            
+            currentQ.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.textContent = opt;
+                btn.className = 'option-btn';
+                btn.onclick = () => selectMcqAnswer(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            document.getElementById('next-btn').classList.add('hidden');
+        }
+
+        function selectMcqAnswer(selectedIndex, selectedBtn) {
+            const currentQ = allMcqQuestions[currentMcqIndex];
+            const allBtns = document.querySelectorAll('.option-btn');
+            
+            allBtns.forEach(btn => btn.disabled = true);
+
+            if (selectedIndex === currentQ.answer) {
+                selectedBtn.classList.add('correct');
+                score += 10;
+            } else {
+                selectedBtn.classList.add('wrong');
+                allBtns[currentQ.answer].classList.add('correct');
+                
+                document.getElementById('explanation-text').textContent = currentQ.explanation;
+                document.getElementById('explanation-box').classList.remove('hidden');
+            }
+
+            document.getElementById('mcq-score-counter').textContent = `الدرجة: ${score}`;
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        function nextMcqQuestion() {
+            currentMcqIndex++;
+            if (currentMcqIndex < allMcqQuestions.length) {
+                loadMcqQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function loadEssayContent() {
+            const container = document.getElementById('essay-container');
+            container.innerHTML = '';
+
+            allEssayQuestions.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'essay-card';
+                card.innerHTML = `
+                    <h3>السؤال المقالي (${index + 1}): ${item.q}</h3>
+                    <div class="essay-answer-box">
+                        <strong>الإجابة والتحليل النموذجي:</strong>
+                        <p>${item.ans}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function showResult() {
+            showScreen('result-screen');
+            const totalPossible = allMcqQuestions.length * 10;
+            document.getElementById('final-score').textContent = `${score} / ${totalPossible}`;
+        }
+    </script>
+</body>
+</html>
